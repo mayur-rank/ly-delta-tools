@@ -25,21 +25,38 @@ A high-speed trading companion for the Odin trading platform. This tool provides
 
 ## 📖 How to Use
 
-### 1. Launching the Tool
-Run `main.py` using Python:
-```bash
-python main.py
-```
-A blue "O" icon will appear in your system tray (bottom right corner of Windows).
+### 1. Launching from Command Prompt (CMD)
+You have two ways to run the tool from CMD:
 
-### 2. Configuring Excel Data
-1.  Right-click the "O" icon in the system tray.
+**Option A: Direct Run (Fastest)**
+```cmd
+venv\Scripts\python.exe main.py
+```
+
+**Option B: Active Environment**
+1. Activate the environment:
+   ```cmd
+   venv\Scripts\activate
+   ```
+2. Run the script:
+   ```cmd
+   python main.py
+   ```
+
+### 2. Launching from Standalone Executable
+You can also run the pre-built tool directly:
+```path
+dist\OdinOverlay.exe
+```
+
+### 3. Configuring Excel Data
+1.  Right-click the blue **"O"** icon in the system tray (bottom right, near the clock).
 2.  Select **Configure BSC/NSC Excel...**.
 3.  **Browse** for your Excel file.
 4.  Specify the **Sheet Name** and the **Cell Addresses** (e.g., E56) where your premiums are calculated.
 5.  Click **Save All Settings**.
 
-### 3. Toggling Overlays
+### 4. Toggling Overlays
 *   **Show Time Overlay:** Displays a red digital clock at the bottom right.
 *   **Show BSC/NSC Premium:** Displays the values from your Excel cells in a translucent box.
 
