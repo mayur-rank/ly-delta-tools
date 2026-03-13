@@ -60,6 +60,17 @@ dist\OdinOverlay.exe
 *   **Show Time Overlay:** Displays a red digital clock at the bottom right.
 *   **Show BSC/NSC Premium:** Displays the values from your Excel cells in a translucent box.
 
+## 🛠 Rebuilding the Executable (.exe)
+
+If you have modified the code and want to update the `OdinOverlay.exe` file, run this command from your project folder:
+
+```cmd
+venv\Scripts\python.exe -m PyInstaller OdinOverlay.spec --noconfirm --clean
+```
+
+> [!NOTE]
+> The build process can take 5-10 minutes. Once finished, the updated file will be available in the `dist` folder.
+
 ## ⏳ Coming Soon (Next Update)
 
 *   **High-Speed Hotkeys:** Press `F1`/`F2` to instantly trigger "Buy" or "Sell" in Odin with pre-filled quantities.
