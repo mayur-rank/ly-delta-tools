@@ -1,0 +1,16 @@
+{
+    "bsc": {
+        "wb": "D:/WorkSpace/Treading/premium.xlsx",
+        "sheet": "Sheet1",
+        "c1": "E56",
+        "c2": "F56",
+        "c3": "G56"
+    },
+    "nsc": {
+        "wb": "C:/Users/Mayur PC/Desktop/premium.xlsx",
+        "sheet": "Sheet1",
+        "c1": "E56",
+        "c2": "F56",
+        "c3": "G56"
+    }
+}
