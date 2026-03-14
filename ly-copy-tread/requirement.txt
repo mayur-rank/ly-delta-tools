@@ -1,0 +1,10 @@
+Prerequisites
+
+Python 3.10+ installed on both PCs.
+
+
+Install dependencies on both PCs:
+
+Bash
+
+pip install pywin32 xlwings
