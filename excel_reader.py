@@ -12,6 +12,100 @@ class ExcelReader:
         self.sheet_name = sheet_name
         self.cells = [cell1, cell2, cell3]
 
+    def append_row(self, sheet_name, row_data, header_data=None, metadata_data=None):
+        """Append a row of data to the specified sheet. Creates sheet and adds metadata/header if needed."""
+        if not self.wb_name:
+            return False
+
+        target_wb = self.wb_name.replace("/", "\\").lower()
+        is_full_path = "\\" in target_wb or ":" in target_wb
+
+        pythoncom.CoInitialize()
+        try:
+            excel = None
+            try:
+                excel = win32com.client.GetActiveObject("Excel.Application")
+            except:
+                try:
+                    excel = win32com.client.Dispatch("Excel.Application")
+                except:
+                    return False
+            
+            if not excel:
+                return False
+
+            # Find the workbook
+            wb = None
+            for w in excel.Workbooks:
+                fullname = w.FullName.lower()
+                name = w.Name.lower()
+                if is_full_path:
+                    if fullname == target_wb:
+                        wb = w
+                        break
+                else:
+                    if name == target_wb:
+                        wb = w
+                        break
+            
+            if not wb:
+                try:
+                    wb = excel.Workbooks(self.wb_name)
+                except:
+                    return False
+
+            # Find or create sheet
+            sheet = None
+            try:
+                sheet = wb.Sheets(sheet_name)
+                newly_created = False
+            except:
+                try:
+                    # Create new sheet at the end
+                    sheet = wb.Sheets.Add(After=wb.Sheets(wb.Sheets.Count))
+                    sheet.Name = sheet_name
+                    newly_created = True
+                except:
+                    return False
+
+            if not sheet:
+                return False
+
+            # If newly created, write metadata and header
+            if newly_created:
+                if metadata_data:
+                    for idx, val in enumerate(metadata_data, 1):
+                        sheet.Cells(1, idx).Value = val
+                if header_data:
+                    for idx, val in enumerate(header_data, 1):
+                        sheet.Cells(3, idx).Value = val
+                last_row = 4
+            else:
+                # Find the last used row in column A
+                try:
+                    # xlUp depends on the Excel instance, using constant -4162
+                    last_row = sheet.Cells(sheet.Rows.Count, 1).End(-4162).Row + 1
+                    # Ensure we don't overwrite header if it's the first data row
+                    if last_row < 4:
+                        last_row = 4
+                except:
+                    # Fallback if End fails
+                    last_row = 4
+                    while sheet.Cells(last_row, 1).Value:
+                        last_row += 1
+
+            # Write row data
+            for idx, val in enumerate(row_data, 1):
+                sheet.Cells(last_row, idx).Value = val
+            
+            return True
+
+        except Exception as e:
+            print(f"Error appending to Excel: {e}")
+            return False
+        finally:
+            pythoncom.CoUninitialize()
+
     def read_cells(self):
         if not self.wb_name or not self.cells:
             return "Set", "Excel", "Config"

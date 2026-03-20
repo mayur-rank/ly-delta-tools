@@ -4,13 +4,19 @@
         "sheet": "Sheet1",
         "c1": "E56",
         "c2": "F56",
-        "c3": "G56"
+        "c3": "G56",
+        "log_enabled": false,
+        "log_interval": "5 minutes",
+        "log_source": 0
     },
     "nsc": {
         "wb": "C:/Users/Mayur PC/Desktop/premium.xlsx",
         "sheet": "Sheet1",
         "c1": "E56",
         "c2": "F56",
-        "c3": "G56"
+        "c3": "G56",
+        "log_enabled": true,
+        "log_interval": "1 second",
+        "log_source": 0
     }
 }
