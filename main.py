@@ -101,21 +101,32 @@ class ExcelConfigWidget(QWidget):
         }
 
 class SettingsDialog(QDialog):
-    def __init__(self, reader_bsc, reader_nsc, settings_bsc, settings_nsc, parent=None):
+    def __init__(self, reader_bsc, reader_nsc, settings_bsc, settings_nsc, settings_general, parent=None):
         super().__init__(parent)
         self.reader_bsc = reader_bsc
         self.reader_nsc = reader_nsc
         
-        self.setWindowTitle("Excel Configuration (BSC & NSC)")
-        self.setFixedSize(450, 480) # Increased height for logging options
+        self.setWindowTitle("Global Configuration")
+        self.setFixedSize(450, 520) 
 
         main_layout = QVBoxLayout()
         
         self.tabs = QTabWidget()
+        
+        # General Settings Tab
+        self.general_widget = QWidget()
+        gen_layout = QFormLayout(self.general_widget)
+        self.time_adj_input = QLineEdit()
+        self.time_adj_input.setPlaceholderText("e.g. 500 or -200")
+        self.time_adj_input.setText(str(settings_general.get("time_adjustment", 0)))
+        gen_layout.addRow("Time Adjustment (ms):", self.time_adj_input)
+        gen_layout.addRow(QLabel("Positive moves clock forward, negative moves it back."))
+        self.tabs.addTab(self.general_widget, "General")
+
+        # BSC/NSC Tabs
         self.bsc_widget = ExcelConfigWidget(self.reader_bsc, "BSC Settings")
         self.nsc_widget = ExcelConfigWidget(self.reader_nsc, "NSC Settings")
         
-        # Apply current settings to widgets
         self.apply_initial_settings(self.bsc_widget, settings_bsc)
         self.apply_initial_settings(self.nsc_widget, settings_nsc)
 
@@ -137,6 +148,12 @@ class SettingsDialog(QDialog):
         widget.log_cell_source.setCurrentIndex(settings.get("log_source", 0))
 
     def save(self):
+        # Save General
+        try:
+            self.general_data = {"time_adjustment": int(self.time_adj_input.text() or 0)}
+        except:
+            self.general_data = {"time_adjustment": 0}
+
         # Save BSC
         self.bsc_data = self.bsc_widget.get_data()
         self.reader_bsc.set_config(
@@ -199,6 +216,10 @@ class OdinOverlayApp:
         self.setup_tray()
 
     def apply_settings(self):
+        # Apply Time Adjustment
+        general = self.settings.get("general", {})
+        self.syncer.set_manual_adjustment(general.get("time_adjustment", 0))
+
         bsc = self.settings.get("bsc", {})
         if bsc:
             self.excel_reader_bsc.set_config(
@@ -236,7 +257,8 @@ class OdinOverlayApp:
                 "log_enabled": self.settings.get("nsc", {}).get("log_enabled", False),
                 "log_interval": self.settings.get("nsc", {}).get("log_interval", "1 minute"),
                 "log_source": self.settings.get("nsc", {}).get("log_source", 0)
-            }
+            },
+            "general": self.settings.get("general", {})
         }
         self.config_manager.save(data)
 
@@ -324,15 +346,21 @@ class OdinOverlayApp:
     def open_settings(self):
         dialog = SettingsDialog(
             self.excel_reader_bsc, self.excel_reader_nsc,
-            self.settings.get("bsc", {}), self.settings.get("nsc", {})
+            self.settings.get("bsc", {}), self.settings.get("nsc", {}),
+            self.settings.get("general", {})
         )
         if dialog.exec_() == QDialog.Accepted:
             # Update local settings object with new data from dialog
             if "bsc" not in self.settings: self.settings["bsc"] = {}
             if "nsc" not in self.settings: self.settings["nsc"] = {}
+            if "general" not in self.settings: self.settings["general"] = {}
+            
             self.settings["bsc"].update(dialog.bsc_data)
             self.settings["nsc"].update(dialog.nsc_data)
+            self.settings["general"].update(dialog.general_data)
+            
             self.save_settings()
+            self.apply_settings() # Apply new adjustment instantly
             # Restart timer check in case logging was enabled/disabled
             self.toggle_premium_overlays()
 

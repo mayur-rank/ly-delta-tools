@@ -15,12 +15,12 @@ class TimeOverlay(QWidget):
         
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_time)
-        self.timer.start(1000)
+        self.timer.start(33) # ~30 FPS for ultra-smooth transition
 
         # Periodic sync timer (every 5 minutes)
         self.sync_timer = QTimer(self)
         self.sync_timer.timeout.connect(self.background_sync)
-        self.sync_timer.start(5 * 60 * 1000)
+        self.sync_timer.start(2 * 60 * 1000) # Sync every 2 minutes to correct hardware clock drift
 
     def initUI(self):
         # Frameless, Always on Top, Click-through (WindowTransparentForInput), and Tool (no taskbar icon)
@@ -55,11 +55,22 @@ class TimeOverlay(QWidget):
         current_time_str = dt.strftime('%I:%M:%S %p').lstrip('0')
         self.time_label.setText(current_time_str)
         
-        # Slightly change appearance if NOT synced (e.g. gray out or red dot)
-        if not is_synced:
-            self.time_label.setStyleSheet("color: #AAAAAA; font-size: 15px; font-weight: bold; background-color: rgba(0,0,0,180); padding: 5px; border-radius: 5px;")
+        # Diagnostics Tooltip
+        rtt_ms = int(self.syncer.last_rtt * 1000)
+        manual_ms = int(self.syncer.manual_offset * 1000)
+        tooltip = f"Source: {source}\nRTT: {rtt_ms}ms\nManual Sync: {manual_ms}ms\nAccuracy: ±{rtt_ms//2}ms"
+        self.time_label.setToolTip(tooltip)
+
+        # Dynamic Styling based on sync quality
+        if not is_synced or source == "System":
+            color = "#AAAAAA" # Gray (Not Synced)
+        elif "HTTP" in source:
+            color = "#00FFFF" # Cyan (High-Precision HTTP Fallback)
         else:
-            self.time_label.setStyleSheet("color: white; font-size: 15px; font-weight: bold; background-color: rgba(0,0,0,180); padding: 5px; border-radius: 5px;")
+            color = "white"   # White (NTP - Best)
+            
+        style = f"color: {color}; font-size: 15px; font-weight: bold; background-color: rgba(0,0,0,180); padding: 5px; border-radius: 5px;"
+        self.time_label.setStyleSheet(style)
 
 
 class PremiumOverlay(QWidget):
