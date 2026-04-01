@@ -79,3 +79,7 @@ venv\Scripts\python.exe -m PyInstaller OdinOverlay.spec --noconfirm --clean
 
 ---
 **Disclaimer:** This tool is for informational and automation purposes only. Trading involves significant risk. Ensure you test all automated sequences in a paper-trading environment before live execution.
+
+
+
+venv\Scripts\python.exe -m PyInstaller --onefile --noconsole ly-copy-tread\odin_data_logger.py
